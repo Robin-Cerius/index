@@ -1,0 +1,411 @@
+<!-- Cerius Kostenindicator — interactief prototype (Workspace Planner-stijl) -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Inter:wght@400;500&display=swap');
+
+  :root{
+    --bg:#FCFCFA;
+    --ink:#1C1C1A;
+    --muted:#6B6B66;
+    --line:#E7E6E1;
+    --sage:#C9D6A0;
+    --sage-soft:#EEF2E0;
+    --sage-line:#A6BC4B;
+    --green:#5B7328;
+    --green-dark:#37451B;
+    --seg1:#37451B;   /* Vaste onderdelen */
+    --seg2:#5B7328;   /* Installaties */
+    --seg3:#8FA84E;   /* Meubels */
+    --seg4:#C3D191;   /* Overig */
+    --hero-txt:#F6F5EF;
+    --font-display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:var(--font-body);line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    /* Vervang de gradient door een echt Cerius-interieurfoto:
+       background:url('foto.jpg') center/cover; met een donkere overlay erop. */
+    background:
+      radial-gradient(120% 90% at 70% 15%, rgba(120,120,90,.22), transparent 60%),
+      linear-gradient(150deg,#2c2b26 0%,#232a1f 55%,#26231d 100%);
+    color:var(--hero-txt);position:relative;overflow:hidden;
+  }
+  .hero-top{display:flex;justify-content:space-between;align-items:center;padding:24px 0}
+  .logo{font-family:var(--font-display);font-weight:600;font-size:22px;letter-spacing:.02em;color:#fff}
+  .hero-inner{max-width:640px;margin:0 auto;text-align:center;padding:56px 0 84px}
+  .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#C3D191;font-weight:500;margin-bottom:20px}
+  h1{
+    font-family:var(--font-display);font-weight:600;
+    font-size:clamp(34px,5.4vw,52px);line-height:1.08;letter-spacing:-.01em;margin:0 0 18px;
+  }
+  .mark{position:relative;white-space:nowrap}
+  .mark svg{position:absolute;left:-4%;bottom:-.16em;width:108%;height:.42em;overflow:visible}
+  .hero-sub{font-size:17px;color:#D9D8CE;margin:0 auto;max-width:44ch}
+
+  /* ---------- Tool ---------- */
+  .tool{padding:60px 0 20px}
+  .grid{display:grid;grid-template-columns:1fr 384px;gap:24px;align-items:start}
+  @media (max-width:840px){.grid{grid-template-columns:1fr}}
+
+  .controls{display:flex;flex-direction:column;gap:20px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}
+  .card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .card-label{font-family:var(--font-display);font-size:16px;font-weight:500}
+  .card-hint{font-size:13px;color:var(--muted);margin:4px 0 0}
+  .badge{font-family:var(--font-display);font-size:24px;font-weight:600;color:var(--green-dark);white-space:nowrap}
+  .badge small{font-family:var(--font-body);font-size:13px;color:var(--muted);font-weight:400;margin-left:2px}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:4px;
+    background:var(--line);border-radius:99px;outline:none;margin:18px 0 0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;
+    background:var(--green);border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.2);
+    cursor:pointer;transition:transform .12s ease;
+  }
+  input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.09)}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--green);border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.2);cursor:pointer}
+  input[type=range]:focus-visible{outline:2px solid var(--green);outline-offset:6px;border-radius:99px}
+  .scale{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:9px}
+  .nudge{font-size:12.5px;color:var(--muted);margin:14px 0 0;padding-top:14px;border-top:1px solid var(--line)}
+
+  /* Niveau */
+  .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  @media (max-width:560px){.levels{grid-template-columns:1fr}}
+  .levels input{position:absolute;opacity:0;pointer-events:none}
+  .level{display:block;cursor:pointer;background:#fff;border:1.5px solid var(--line);border-radius:13px;padding:15px 14px;height:100%;transition:border-color .15s ease,background .15s ease}
+  .level:hover{border-color:#CBCBBE}
+  .levels input:checked + .level{border-color:var(--sage-line);background:var(--sage-soft)}
+  .levels input:focus-visible + .level{outline:2px solid var(--green);outline-offset:2px}
+  .level-name{font-family:var(--font-display);font-size:15px;font-weight:500;margin-bottom:2px}
+  .level-price{font-size:12.5px;color:var(--green);font-weight:500;margin-bottom:8px}
+  .level-desc{font-size:12px;color:var(--muted);line-height:1.42}
+
+  /* Result */
+  .result{position:sticky;top:24px;background:var(--sage-soft);border:1px solid #DCE3C4;border-radius:18px;padding:26px 24px}
+  @media (max-width:840px){.result{position:static}}
+  .result-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:500;margin-bottom:8px}
+  .total{font-family:var(--font-display);font-size:clamp(30px,5vw,40px);font-weight:600;line-height:1.06;letter-spacing:-.01em;color:var(--green-dark)}
+  .total-sub{font-size:13.5px;color:var(--muted);margin-top:7px}
+
+  .break-title{font-family:var(--font-display);font-size:13px;font-weight:500;margin:22px 0 10px}
+  .bar{display:flex;height:12px;border-radius:99px;overflow:hidden;background:rgba(0,0,0,.06)}
+  .bar span{display:block;height:100%;transition:width .45s cubic-bezier(.4,0,.2,1)}
+  .legend{display:grid;grid-template-columns:1fr;gap:7px;margin-top:14px}
+  .leg{display:flex;align-items:center;gap:8px;font-size:12.5px}
+  .dot{width:9px;height:9px;border-radius:3px;flex:none}
+  .leg-name{color:var(--ink)}
+  .leg-val{margin-left:auto;font-weight:500;color:var(--green-dark);font-family:var(--font-body)}
+
+  .disclaimer{font-size:11.5px;color:var(--muted);line-height:1.5;border-top:1px solid #DCE3C4;padding-top:15px;margin:20px 0 16px}
+  .cta{display:block;width:100%;text-align:center;background:var(--green-dark);color:#F6F5EF;font-family:var(--font-display);font-size:14.5px;font-weight:500;border:none;border-radius:11px;padding:14px;cursor:pointer;text-decoration:none;transition:transform .12s ease,background .15s ease}
+  .cta:hover{background:#2b3714;transform:translateY(-1px)}
+  .cta:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+  .phone{text-align:center;font-size:12.5px;color:var(--muted);margin-top:11px}
+  .phone a{color:var(--green-dark)}
+
+  /* ---------- Opbouw / accordion ---------- */
+  .opbouw{padding:64px 0 80px}
+  .opbouw-head{max-width:620px;margin:0 auto 36px;text-align:center}
+  .opbouw-head h2{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,3.6vw,34px);line-height:1.12;letter-spacing:-.01em;margin:0 0 12px}
+  .opbouw-head p{font-size:15.5px;color:var(--muted);margin:0}
+  .acc{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  .acc-item{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .acc-trigger{
+    width:100%;display:flex;align-items:center;gap:16px;background:none;border:none;cursor:pointer;
+    padding:20px 22px;text-align:left;font-family:var(--font-body);
+  }
+  .acc-trigger:focus-visible{outline:2px solid var(--green);outline-offset:-2px;border-radius:14px}
+  .acc-title{font-family:var(--font-display);font-size:16.5px;font-weight:500}
+  .acc-price{font-size:13px;color:var(--green);font-weight:500;margin-left:auto;white-space:nowrap}
+  .chev{flex:none;width:20px;height:20px;color:var(--muted);transition:transform .3s ease}
+  .acc-item.open .chev{transform:rotate(180deg)}
+  .acc-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1)}
+  .acc-item.open .acc-panel{grid-template-rows:1fr}
+  .acc-inner{overflow:hidden}
+  .acc-body{padding:0 22px 22px}
+  .acc-lead{font-size:14px;color:var(--muted);line-height:1.55;margin:0 0 16px}
+  .acc-plus{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--green);font-weight:500;margin:0 0 10px}
+  .feats{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+  @media (max-width:520px){.feats{grid-template-columns:1fr}}
+  .feats li{position:relative;padding-left:24px;font-size:13.5px;line-height:1.4}
+  .feats li::before{
+    content:"";position:absolute;left:0;top:2px;width:16px;height:16px;border-radius:50%;
+    background:var(--sage);
+    -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") center/12px no-repeat;
+    mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E") center/12px no-repeat;
+  }
+  .cats{display:flex;flex-direction:column;gap:14px}
+  .cat{display:flex;gap:12px}
+  .cat-dot{width:10px;height:10px;border-radius:3px;flex:none;margin-top:5px}
+  .cat-name{font-family:var(--font-display);font-weight:500;font-size:14px}
+  .cat-name span{font-family:var(--font-body);font-weight:400;color:var(--green);font-size:12.5px;margin-left:8px}
+  .cat-desc{font-size:13px;color:var(--muted);line-height:1.45;margin-top:2px}
+
+  /* ---------- Footer ---------- */
+  footer{background:#111;color:#EDEDE7;padding:44px 0}
+  .foot-logo{font-family:var(--font-display);font-weight:600;font-size:26px;color:#fff;letter-spacing:.02em}
+  .foot-tag{font-style:italic;color:var(--sage-line);font-size:15px;margin-top:2px}
+  .foot-links{margin-top:20px;font-size:13.5px;line-height:1.7}
+  .foot-links a{color:#CFCFC7;text-decoration:none}
+  .foot-links a:hover{color:#fff}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-top"><span class="logo">CERIUS</span></div>
+    <div class="hero-inner">
+      <div class="eyebrow">Kostenindicator</div>
+      <h1>Wat <span class="mark">kost<svg viewBox="0 0 120 12" preserveAspectRatio="none"><path d="M3 8 C 30 3, 60 11, 88 6 S 116 5, 117 7" fill="none" stroke="#A6BC4B" stroke-width="5" stroke-linecap="round"/></svg></span> jouw kantoor?</h1>
+      <p class="hero-sub">Krijg in een paar tikken een gevoel voor de kosten van je kantoorinrichting. Geen offerte — een richting om mee te beginnen.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TOOL ===== -->
+<section class="tool">
+  <div class="wrap">
+    <div class="grid">
+      <div class="controls">
+
+        <div class="card">
+          <div class="card-head">
+            <span class="card-label">Hoeveel ruimte heb je?</span>
+            <span class="badge" id="m2Badge">750 <small>m²</small></span>
+          </div>
+          <input type="range" id="m2" min="100" max="5000" step="10" value="750" aria-label="Aantal vierkante meter">
+          <div class="scale"><span>100 m²</span><span>5.000 m²</span></div>
+          <p class="nudge">Weet je je m² nog niet? Straks reken je precies uit hoeveel ruimte je nodig hebt met de <b>Workspace Planner</b>.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><span class="card-label">Welk niveau past bij jullie?</span></div>
+          <p class="card-hint">Van efficiënt en toekomstbestendig tot volledig maatwerk.</p>
+          <div class="levels" role="radiogroup" aria-label="Afwerkingsniveau">
+            <input type="radio" name="niveau" id="nFunc" value="functioneel">
+            <label class="level" for="nFunc">
+              <div class="level-name">Functioneel</div>
+              <div class="level-price">€500–750 / m²</div>
+              <div class="level-desc">Slim ontworpen, open werkomgeving met de basis goed op orde.</div>
+            </label>
+            <input type="radio" name="niveau" id="nRepr" value="representatief" checked>
+            <label class="level" for="nRepr">
+              <div class="level-name">Representatief</div>
+              <div class="level-price">€750–1.000 / m²</div>
+              <div class="level-desc">Meer detail, meer gesloten ruimtes en betere akoestiek.</div>
+            </label>
+            <input type="radio" name="niveau" id="nHigh" value="highend">
+            <label class="level" for="nHigh">
+              <div class="level-name">High-end</div>
+              <div class="level-price">vanaf €1.000 / m²</div>
+              <div class="level-desc">Maatwerk, bijzondere ruimtes en hoogwaardige materialen.</div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <aside class="result" aria-live="polite">
+        <div class="result-label">Indicatieve kosten</div>
+        <div class="total" id="total">€375.000 – €500.000</div>
+        <div class="total-sub" id="totalSub">€750 – €1.000 per m² · ± 750 m²</div>
+
+        <div class="break-title">Waar gaat je geld naartoe?</div>
+        <div class="bar" aria-hidden="true">
+          <span id="s1" style="background:var(--seg1)"></span>
+          <span id="s2" style="background:var(--seg2)"></span>
+          <span id="s3" style="background:var(--seg3)"></span>
+          <span id="s4" style="background:var(--seg4)"></span>
+        </div>
+        <div class="legend">
+          <div class="leg"><span class="dot" style="background:var(--seg1)"></span><span class="leg-name">Vaste onderdelen</span><span class="leg-val" id="v1"></span></div>
+          <div class="leg"><span class="dot" style="background:var(--seg2)"></span><span class="leg-name">Installaties</span><span class="leg-val" id="v2"></span></div>
+          <div class="leg"><span class="dot" style="background:var(--seg3)"></span><span class="leg-name">Meubels</span><span class="leg-val" id="v3"></span></div>
+          <div class="leg"><span class="dot" style="background:var(--seg4)"></span><span class="leg-name">Overig</span><span class="leg-val" id="v4"></span></div>
+        </div>
+
+        <p class="disclaimer" id="disclaimer">Indicatie op basis van gemiddelden. Elk pand en elke wens is anders — je echte prijs bepalen we samen. Percentages tellen niet altijd exact op tot 100%.</p>
+        <a class="cta" href="#">Plan een vrijblijvend gesprek</a>
+        <div class="phone">of bel <a href="tel:+31756156010">+31 (0)75 615 60 10</a></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ===== OPBOUW ===== -->
+<section class="opbouw">
+  <div class="wrap">
+    <div class="opbouw-head">
+      <h2>Zo is een kantoor opgebouwd</h2>
+      <p>Elk niveau bouwt voort op het vorige. Klap open om te zien wat je krijgt — en waar de kosten in zitten.</p>
+    </div>
+
+    <div class="acc" id="acc">
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-title">Functioneel</span>
+          <span class="acc-price">€500–750 / m²</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="acc-panel"><div class="acc-inner"><div class="acc-body">
+          <p class="acc-lead">Een volledige, toekomstbestendige werkomgeving volgens het Culture-based Working-principe: een (semi-)open kantoor met vergader- en focusruimtes, een centrale receptie, lounge en breakout-ruimte. De basis, goed en efficiënt uitgevoerd.</p>
+          <p class="acc-plus">Dit zit erin</p>
+          <ul class="feats">
+            <li>Kwaliteitsvloeren</li>
+            <li>Goede geluidsisolerende muren</li>
+            <li>Vast meubilair</li>
+            <li>Cultuur en merkidentiteit</li>
+            <li>Volgens regels en voorschriften</li>
+            <li>Geen grote ingrepen aan plafonds of installaties</li>
+          </ul>
+        </div></div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-title">Representatief</span>
+          <span class="acc-price">€750–1.000 / m²</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="acc-panel"><div class="acc-inner"><div class="acc-body">
+          <p class="acc-lead">Een hoger kwaliteitsniveau in ontwerp, management en constructie. Meer gesloten kantoren, vergaderruimtes en privacy-opties, betere materialen en een duurzamer gebouw.</p>
+          <p class="acc-plus">Alles in Functioneel, plus</p>
+          <ul class="feats">
+            <li>Upgrade van plafonds en installaties</li>
+            <li>Reserveringssysteem voor ruimtes</li>
+            <li>Verbeterde akoestiek</li>
+            <li>Meer vast meubilair</li>
+            <li>Bredere keuze aan materialen</li>
+          </ul>
+        </div></div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-title">High-end</span>
+          <span class="acc-price">vanaf €1.000 / m²</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="acc-panel"><div class="acc-inner"><div class="acc-body">
+          <p class="acc-lead">Extra constructieve ingrepen zoals trappen tussen verdiepingen en aanpassingen aan de gevel. Faciliteiten voor grote groepen — denk aan een restaurant, bibliotheek of lounges — met hoogwaardige, op maat gemaakte materialen.</p>
+          <p class="acc-plus">Alles in Representatief, plus</p>
+          <ul class="feats">
+            <li>Grote aanpassingen aan klimaatsystemen</li>
+            <li>Speciaal lichtplan</li>
+            <li>Bouwkundige aanpassingen</li>
+            <li>Speciale ruimtes (zoals een tv-studio)</li>
+            <li>Gebieden met hoge beveiliging</li>
+            <li>Maximale geluidsisolatie</li>
+          </ul>
+        </div></div></div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-trigger" aria-expanded="false">
+          <span class="acc-title">Waar gaat je geld naartoe?</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="acc-panel"><div class="acc-inner"><div class="acc-body">
+          <p class="acc-lead">De inrichtingskosten vallen grofweg in vier blokken. De verhouding schuift mee met je keuzes — meer gesloten ruimtes betekent bijvoorbeeld meer wanden, akoestiek en installaties.</p>
+          <div class="cats">
+            <div class="cat"><span class="cat-dot" style="background:var(--seg1)"></span><div>
+              <div class="cat-name">Vaste onderdelen <span>30–60%</span></div>
+              <div class="cat-desc">Vloeren, (glas)wanden met geluidsisolatie, akoestiek en vast meubilair zoals pantry's en kasten. Meestal de grootste post.</div>
+            </div></div>
+            <div class="cat"><span class="cat-dot" style="background:var(--seg2)"></span><div>
+              <div class="cat-name">Installaties <span>15–35%</span></div>
+              <div class="cat-desc">Elektra, data (incl. wifi & serverrack), klimaat en brandveiligheid. De verhuurder levert vaak alleen een basisinstallatie.</div>
+            </div></div>
+            <div class="cat"><span class="cat-dot" style="background:var(--seg3)"></span><div>
+              <div class="cat-name">Meubels <span>10–35%</span></div>
+              <div class="cat-desc">Werkplekken, stoelen en meubels voor meeting, lounge en lunch. Los meubilair is vaak voordeliger dan maatwerk.</div>
+            </div></div>
+            <div class="cat"><span class="cat-dot" style="background:var(--seg4)"></span><div>
+              <div class="cat-name">Overig <span>15–25%</span></div>
+              <div class="cat-desc">Design & management, de verhuizing en bouwkosten zoals afval, logistiek en verzekeringen.</div>
+            </div></div>
+          </div>
+        </div></div></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-logo">CERIUS</div>
+    <div class="foot-tag">Feel good, work better.</div>
+    <div class="foot-links">
+      <a href="https://www.cerius.nl">www.cerius.nl</a><br>
+      <a href="mailto:info@cerius.nl">info@cerius.nl</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var PRICES={
+    functioneel:   {lo:500, hi:750,  label:'Functioneel'},
+    representatief:{lo:750, hi:1000, label:'Representatief'},
+    highend:       {lo:1000,hi:1500, label:'High-end', open:true}
+  };
+  var SHARES=[
+    {id:1,pct:0.40},{id:2,pct:0.22},{id:3,pct:0.20},{id:4,pct:0.18}
+  ];
+  var eur=new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+  function money(n){return eur.format(n).replace(/\u00A0/g,'\u2009');}
+  function roundTo(n,s){return Math.round(n/s)*s;}
+  var $=function(id){return document.getElementById(id);};
+  var state={m2:750,niveau:'representatief'};
+
+  function render(){
+    var p=PRICES[state.niveau], m2=state.m2;
+    var lo=roundTo(m2*p.lo,1000), hi=roundTo(m2*p.hi,1000), mid=(lo+hi)/2;
+
+    $('total').textContent=money(lo)+' – '+money(hi);
+    var perM2=(p.open?'vanaf '+money(p.lo):money(p.lo)+' – '+money(p.hi));
+    $('totalSub').textContent=perM2+' per m² · ± '+m2.toLocaleString('nl-NL')+' m²';
+
+    SHARES.forEach(function(s){
+      $('s'+s.id).style.width=(s.pct*100)+'%';
+      $('v'+s.id).textContent=money(roundTo(mid*s.pct,1000));
+    });
+
+    $('m2Badge').innerHTML=m2.toLocaleString('nl-NL')+' <small>m²</small>';
+
+    var base='Indicatie op basis van gemiddelden. Elk pand en elke wens is anders — je echte prijs bepalen we samen. Percentages tellen niet altijd exact op tot 100%.';
+    $('disclaimer').textContent=p.open? base+' High-end start bij €1.000 per m² en kent geen vast plafond; de bovengrens is een voorbeeld.' : base;
+  }
+
+  $('m2').addEventListener('input',function(e){state.m2=+e.target.value;render();});
+  document.querySelectorAll('input[name=niveau]').forEach(function(r){
+    r.addEventListener('change',function(e){state.niveau=e.target.value;render();});
+  });
+
+  document.querySelectorAll('.acc-trigger').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var item=btn.closest('.acc-item');
+      var open=item.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+    });
+  });
+
+  render();
+})();
+</script>
